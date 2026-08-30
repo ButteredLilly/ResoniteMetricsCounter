@@ -100,10 +100,17 @@ internal sealed class DetailedPage : MetricsPageBase
         foreach (var metric in metricsCounter.ByElement.Metrics.OrderByDescending(m => m.Ticks).Take(maxItems))
         {
             var item = items[i] ?? (items[i] = new Item(container, Columns));
-
-            if (!item.Update(metric, maxTicks, totalTicks, frameCount))
+            //Simple try catch to handle errors when object is deleted. This is not a proper fix but it works.
+            try
             {
-                metricsCounter.ByElement.Remove(metric.Target);
+                if (!item.Update(metric, maxTicks, totalTicks, frameCount))
+                {
+                    metricsCounter.ByElement.Remove(metric.Target);
+                }
+            }
+            catch
+            {
+                    metricsCounter.ByElement.Remove(metric.Target);
             }
             i++;
         }
